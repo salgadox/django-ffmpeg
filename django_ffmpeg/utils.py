@@ -3,7 +3,6 @@ import logging
 import os
 import re
 import subprocess
-import sys
 
 from pytz import timezone
 
@@ -36,21 +35,12 @@ class Converter(object):
         """OS independency invoking of command line interface"""
         if self.emulation:
             return logger.debug("Call: %s" % cmd)
-        if sys.version_info[0] > 2:
-            res = subprocess.getstatusoutput(cmd)
-            if not without_output and res and len(res):
-                return res[1]
-        elif os.name == "posix":
-            import commands
-
-            return commands.getoutput(cmd)
+        if without_output:
+            DEVNULL = open(os.devnull, "wb")
+            subprocess.Popen(cmd, stdout=DEVNULL, stderr=DEVNULL)
         else:
-            if without_output:
-                DEVNULL = open(os.devnull, "wb")
-                subprocess.Popen(cmd, stdout=DEVNULL, stderr=DEVNULL)
-            else:
-                p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-                return p.stdout.read()
+            p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+            return p.stdout.read()
 
     def choose_video(self):
         """First unconverted video"""
