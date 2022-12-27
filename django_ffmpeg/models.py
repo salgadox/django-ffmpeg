@@ -165,16 +165,28 @@ class Video(models.Model):
     )
 
     @property
+    def filepath(self):
+        try:
+            return self._filepath
+        except AttributeError:
+            try:
+                filepath = self.video.path
+            except NotImplementedError:
+                filepath = self.video.storage.url(self.video.name)
+            self._filepath = filepath
+            return self._filepath
+
+    @property
     def converted_path(self):
         if not self.convert_extension:
             return None
-        filepath = self.video.path
+        filepath = self.filepath
         filepath = filepath.replace(FFMPEG_ORIG_VIDEO, FFMPEG_CONV_VIDEO)
         return re.sub(r"[^\.]{1,10}$", self.convert_extension, filepath)
 
     @property
     def thumb_video_path(self):
-        filepath = self.video.path
+        filepath = self.filepath
         filepath = filepath.replace(FFMPEG_ORIG_VIDEO, FFMPEG_THUMB_VIDEO)
         return re.sub(r"[^\.]{1,10}$", "jpg", filepath)
 

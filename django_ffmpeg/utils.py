@@ -62,7 +62,7 @@ class Converter(object):
 
     def choose_convert_command(self, video):
         """Command for video converting by matching with video file name"""
-        filepath = video.video.path
+        filepath = video.filepath
         filename = filepath.split("/")[-1]
         video_info = {
             "name": filename,
@@ -83,7 +83,7 @@ class Converter(object):
         video.convert_extension = cmd.convert_extension
         try:
             c = cmd.command % {
-                "input_file": video.video.path,
+                "input_file": video.filepath,
                 "output_file": video.converted_path,
             }
             logger.info("Converting video command: %s" % c)
@@ -109,7 +109,7 @@ class Converter(object):
         try:
             if not video.thumb:
                 cmd = cmd.thumb_command % {
-                    "in_file": video.video.path,
+                    "in_file": video.filepath,
                     "out_file": video.thumb_video_path,
                     "thumb_frame": video.thumb_frame,
                 }
