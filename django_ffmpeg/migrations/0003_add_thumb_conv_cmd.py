@@ -8,19 +8,26 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('django_ffmpeg', '0002_add_thumb_frame_field'),
+        ("django_ffmpeg", "0002_add_thumb_frame_field"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='convertingcommand',
-            name='thumb_command',
-            field=models.TextField(default='', help_text=b'Example: /usr/bin/ffmpeg -hide_banner -nostats -i %(in_file)s -y -frames:v 1 -ss %(thumb_frame)s %(out_file)s', verbose_name='System command to convert thumb'),
+            model_name="convertingcommand",
+            name="thumb_command",
+            field=models.TextField(
+                default="",
+                help_text=b"Example: /usr/bin/ffmpeg -hide_banner -nostats -i %(in_file)s -y -frames:v 1 -ss %(thumb_frame)s %(out_file)s",
+                verbose_name="System command to convert thumb",
+            ),
             preserve_default=False,
         ),
         migrations.AlterField(
-            model_name='convertingcommand',
-            name='command',
-            field=models.TextField(help_text=b'Example: /usr/bin/ffmpeg -nostats -y -i %(input_file)s -acodec libmp3lame -ar 44100 -f flv %(output_file)s', verbose_name='System command to convert video'),
+            model_name="convertingcommand",
+            name="command",
+            field=models.TextField(
+                help_text=b"Example: /usr/bin/ffmpeg -nostats -y -i %(input_file)s -acodec libmp3lame -ar 44100 -f flv %(output_file)s",
+                verbose_name="System command to convert video",
+            ),
         ),
     ]

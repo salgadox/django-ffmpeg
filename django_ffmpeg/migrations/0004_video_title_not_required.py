@@ -8,13 +8,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('django_ffmpeg', '0003_add_thumb_conv_cmd'),
+        ("django_ffmpeg", "0003_add_thumb_conv_cmd"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='video',
-            name='title',
-            field=models.CharField(blank=True, max_length=500, null=True, verbose_name='Title'),
+            model_name="video",
+            name="title",
+            field=models.CharField(
+                blank=True, max_length=500, null=True, verbose_name="Title"
+            ),
         ),
     ]

@@ -6,13 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('django_ffmpeg', '0005_py3_fixes'),
+        ("django_ffmpeg", "0005_py3_fixes"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='convertingcommand',
-            name='title',
-            field=models.CharField(blank=True, max_length=64, null=True, verbose_name='Title'),
+            model_name="convertingcommand",
+            name="title",
+            field=models.CharField(
+                blank=True, max_length=64, null=True, verbose_name="Title"
+            ),
         ),
     ]

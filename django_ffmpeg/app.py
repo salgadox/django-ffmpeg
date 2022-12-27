@@ -8,8 +8,8 @@ from django_ffmpeg import defaults as ffmpeg_settings
 
 
 class DjangoFfmpegConfig(AppConfig):
-    name = 'django_ffmpeg'
-    verbose_name = _('Videos')
+    name = "django_ffmpeg"
+    verbose_name = _("Videos")
 
     def ready(self):
         self._make_directories()
@@ -21,8 +21,7 @@ class DjangoFfmpegConfig(AppConfig):
             ffmpeg_settings.FFMPEG_CONV_VIDEO,
         )
         for _ in dirs:
-            os.makedirs(os.path.join(
-                settings.MEDIA_ROOT,
-                ffmpeg_settings.FFMPEG_PRE_DIR,
-                _
-            ), exist_ok =True)
+            os.makedirs(
+                os.path.join(settings.MEDIA_ROOT, ffmpeg_settings.FFMPEG_PRE_DIR, _),
+                exist_ok=True,
+            )

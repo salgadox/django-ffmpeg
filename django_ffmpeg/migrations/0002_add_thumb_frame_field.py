@@ -8,13 +8,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('django_ffmpeg', '0001_initial'),
+        ("django_ffmpeg", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='video',
-            name='thumb_frame',
-            field=models.PositiveIntegerField(default=0, verbose_name='Frame number for thumbnail'),
+            model_name="video",
+            name="thumb_frame",
+            field=models.PositiveIntegerField(
+                default=0, verbose_name="Frame number for thumbnail"
+            ),
         ),
     ]
