@@ -3,6 +3,7 @@ import logging
 import os
 import re
 import subprocess
+import tempfile
 
 from pytz import timezone
 
@@ -31,16 +32,37 @@ class Converter(object):
         self.convert_video_thumb(cmd, video)
         self.convert_video_file(cmd, video)
 
-    def call_cli(self, cmd, without_output=False):
+    def call_cli(
+        self, cmd, cmd_kwargs, storage=None, video_name=None, without_output=False
+    ):
         """OS independency invoking of command line interface"""
-        if self.emulation:
-            return logger.debug("Call: %s" % cmd)
-        if without_output:
-            DEVNULL = open(os.devnull, "wb")
-            subprocess.Popen(cmd, stdout=DEVNULL, stderr=DEVNULL)
+
+        def _call_cli(command):
+            logger.info("Calling command: %s" % command)
+            if self.emulation:
+                return logger.debug("Call: %s" % command)
+            if without_output:
+                DEVNULL = open(os.devnull, "wb")
+                subprocess.Popen(command, stdout=DEVNULL, stderr=DEVNULL)
+            else:
+                p = subprocess.Popen(command, stdout=subprocess.PIPE)
+                return p.stdout.read()
+
+        if storage is None:
+            return _call_cli(cmd % cmd_kwargs)
         else:
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-            return p.stdout.read()
+            with tempfile.NamedTemporaryFile() as tmp_input_file:
+                with storage.open(video_name, "rb") as src:
+                    tmp_input_file.write(src.read())
+                with tempfile.NamedTemporaryFile() as tmp_output_file:
+                    _cmd_kwargs = cmd_kwargs.copy()
+                    _cmd_kwargs["input_filepath"] = tmp_input_file.name
+                    _cmd_kwargs["output_filepath"] = tmp_output_file.name
+                    _call_cli(cmd % _cmd_kwargs)
+                    # reset the file pointer to the beginning of the file
+                    tmp_output_file.seek(0)
+                    with storage.open(tmp_output_file, "wb") as dst:
+                        dst.write(tmp_output_file.read())
 
     def choose_video(self):
         """First unconverted video"""
@@ -72,12 +94,19 @@ class Converter(object):
         video.save()
         video.convert_extension = cmd.convert_extension
         try:
-            c = cmd.command % {
+            if video.is_local:
+                storage = None
+            else:
+                storage = video.video.storage
+
+            cmd_kwargs = {
                 "input_file": video.filepath,
                 "output_file": video.converted_path,
             }
-            logger.info("Converting video command: %s" % c)
-            output = self.call_cli(c)
+            # logger.info("Converting video command: %s" % c)
+            output = self.call_cli(
+                cmd.command, cmd_kwargs, storage=storage, video_name=video.video.name
+            )
             logger.info("Converting video result: %s" % output)
         except Exception as e:
             logger.error("Converting video error", exc_info=True)
@@ -98,12 +127,23 @@ class Converter(object):
         """"""
         try:
             if not video.thumb:
-                cmd = cmd.thumb_command % {
-                    "in_file": video.filepath,
-                    "out_file": video.thumb_video_path,
+                if video.is_local:
+                    storage = None
+                else:
+                    storage = video.video.storage
+
+                cmd_kwargs = {
+                    "input_file": video.filepath,
+                    "output_file": video.thumb_video_path,
                     "thumb_frame": video.thumb_frame,
                 }
-                self.call_cli(cmd, True)
-                logger.info("Creating thumbnail command: %s" % cmd)
+                self.call_cli(
+                    cmd.thumb_command,
+                    cmd_kwargs,
+                    storage=storage,
+                    video_name=video.video.name,
+                    without_output=True,
+                )
+            # logger.info("Creating thumbnail command: %s" % cmd)
         except:
             logger.error("Converting thumb error", exc_info=True)

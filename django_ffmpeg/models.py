@@ -165,16 +165,24 @@ class Video(models.Model):
     )
 
     @property
-    def filepath(self):
+    def is_local(self):
         try:
-            return self._filepath
+            return self._is_local
         except AttributeError:
             try:
-                filepath = self.video.path
+                _ = self.video.path
+                self._is_local = True
             except NotImplementedError:
-                filepath = self.video.storage.url(self.video.name)
-            self._filepath = filepath
-            return self._filepath
+                self._is_local = False
+            return self._is_local
+
+    @property
+    def filepath(self):
+        if self.is_local:
+            self._filepath = self.video.path
+        else:
+            self._filepath = self.video.storage.url(self.video.name)
+        return self._filepath
 
     @property
     def converted_path(self):
