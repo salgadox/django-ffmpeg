@@ -41,11 +41,13 @@ class Converter(object):
             logger.info("Calling command: %s" % command)
             if self.emulation:
                 return logger.debug("Call: %s" % command)
+
+            command_args = command.split()
             if without_output:
                 DEVNULL = open(os.devnull, "wb")
-                subprocess.Popen(command, stdout=DEVNULL, stderr=DEVNULL)
+                subprocess.Popen(command_args, stdout=DEVNULL, stderr=DEVNULL)
             else:
-                p = subprocess.Popen(command, stdout=subprocess.PIPE)
+                p = subprocess.Popen(command_args, stdout=subprocess.PIPE)
                 return p.stdout.read()
 
         if storage is None:
@@ -56,13 +58,14 @@ class Converter(object):
                     tmp_input_file.write(src.read())
                 with tempfile.NamedTemporaryFile() as tmp_output_file:
                     _cmd_kwargs = cmd_kwargs.copy()
-                    _cmd_kwargs["input_filepath"] = tmp_input_file.name
-                    _cmd_kwargs["output_filepath"] = tmp_output_file.name
-                    _call_cli(cmd % _cmd_kwargs)
+                    _cmd_kwargs["input_file"] = tmp_input_file.name
+                    _cmd_kwargs["output_file"] = tmp_output_file.name
+                    out = _call_cli(cmd % _cmd_kwargs)
                     # reset the file pointer to the beginning of the file
                     tmp_output_file.seek(0)
                     with storage.open(tmp_output_file, "wb") as dst:
                         dst.write(tmp_output_file.read())
+                    return out
 
     def choose_video(self):
         """First unconverted video"""
