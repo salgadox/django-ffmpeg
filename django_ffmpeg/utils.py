@@ -4,6 +4,7 @@ import os
 import re
 import subprocess
 import tempfile
+from os import path
 
 from pytz import timezone
 
@@ -56,7 +57,9 @@ class Converter(object):
             tmp_input_file = tempfile.NamedTemporaryFile()
             with storage.open(video_name, "rb") as src:
                 tmp_input_file.write(src.read())
-            tmp_output_file = tempfile.NamedTemporaryFile()
+            tmp_output_file = tempfile.NamedTemporaryFile(
+                suffix=path.splitext(cmd_kwargs["output_file"])[1]
+            )
 
             _cmd_kwargs = cmd_kwargs.copy()
             _cmd_kwargs["input_file"] = tmp_input_file.name
