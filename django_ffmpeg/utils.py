@@ -77,7 +77,7 @@ class Converter(object):
             dst_basename = path.splitext(
                 video_name.replace(FFMPEG_ORIG_VIDEO, FFMPEG_CONV_VIDEO)
             )[0]
-            dst_filepath = f"{dst_basename}.{dst_ext}"
+            dst_filepath = f"{dst_basename}{dst_ext}"
             with storage.open(dst_filepath, "wb") as dst:
                 dst.write(tmp_output_file.read())
 
