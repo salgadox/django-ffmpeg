@@ -53,19 +53,31 @@ class Converter(object):
         if storage is None:
             return _call_cli(cmd % cmd_kwargs)
         else:
-            with tempfile.NamedTemporaryFile() as tmp_input_file:
-                with storage.open(video_name, "rb") as src:
-                    tmp_input_file.write(src.read())
-                with tempfile.NamedTemporaryFile() as tmp_output_file:
-                    _cmd_kwargs = cmd_kwargs.copy()
-                    _cmd_kwargs["input_file"] = tmp_input_file.name
-                    _cmd_kwargs["output_file"] = tmp_output_file.name
-                    out = _call_cli(cmd % _cmd_kwargs)
-                    # reset the file pointer to the beginning of the file
-                    tmp_output_file.seek(0)
-                    with storage.open(tmp_output_file, "wb") as dst:
-                        dst.write(tmp_output_file.read())
-                    return out
+            tmp_input_file = tempfile.NamedTemporaryFile()
+            with storage.open(video_name, "rb") as src:
+                tmp_input_file.write(src.read())
+            tmp_output_file = tempfile.NamedTemporaryFile()
+
+            _cmd_kwargs = cmd_kwargs.copy()
+            _cmd_kwargs["input_file"] = tmp_input_file.name
+            _cmd_kwargs["output_file"] = tmp_output_file.name
+            out = _call_cli(cmd % _cmd_kwargs)
+
+            # close the input temp file
+            tmp_input_file.close()
+
+            # reset the file pointer to the beginning of the file
+            tmp_output_file.seek(0)
+
+            # write the tmp file to the storage
+            with storage.open(tmp_output_file, "wb") as dst:
+                dst.write(tmp_output_file.read())
+
+            # clouse the output temp file
+            tmp_output_file.close()
+
+            # return the stdout
+            return out
 
     def choose_video(self):
         """First unconverted video"""
