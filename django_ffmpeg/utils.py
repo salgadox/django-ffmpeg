@@ -8,6 +8,7 @@ from os import path
 
 from pytz import timezone
 
+from django_ffmpeg.defaults import FFMPEG_CONV_VIDEO, FFMPEG_ORIG_VIDEO
 from django_ffmpeg.models import ConvertingCommand, Video
 
 logger = logging.getLogger(__name__)
@@ -54,12 +55,11 @@ class Converter(object):
         if storage is None:
             return _call_cli(cmd % cmd_kwargs)
         else:
+            dst_ext = path.splitext(cmd_kwargs["output_file"])[1]
             tmp_input_file = tempfile.NamedTemporaryFile()
             with storage.open(video_name, "rb") as src:
                 tmp_input_file.write(src.read())
-            tmp_output_file = tempfile.NamedTemporaryFile(
-                suffix=path.splitext(cmd_kwargs["output_file"])[1]
-            )
+            tmp_output_file = tempfile.NamedTemporaryFile(suffix=dst_ext)
 
             _cmd_kwargs = cmd_kwargs.copy()
             _cmd_kwargs["input_file"] = tmp_input_file.name
@@ -73,7 +73,12 @@ class Converter(object):
             tmp_output_file.seek(0)
 
             # write the tmp file to the storage
-            with storage.open(tmp_output_file, "wb") as dst:
+            # TODO: fix this terrible workaround
+            dst_basename = path.splitext(
+                video_name.replace(FFMPEG_ORIG_VIDEO, FFMPEG_CONV_VIDEO)
+            )[0]
+            dst_filepath = f"{dst_basename}.{dst_ext}"
+            with storage.open(dst_filepath, "wb") as dst:
                 dst.write(tmp_output_file.read())
 
             # clouse the output temp file
