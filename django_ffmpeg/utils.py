@@ -45,10 +45,10 @@ class Converter(object):
             command_args = command.split()
             if without_output:
                 DEVNULL = open(os.devnull, "wb")
-                subprocess.Popen(command_args, stdout=DEVNULL, stderr=DEVNULL)
+                subprocess.run(command_args, stdout=DEVNULL, stderr=DEVNULL)
             else:
-                p = subprocess.Popen(command_args, stdout=subprocess.PIPE)
-                return p.stdout.read()
+                result = subprocess.run(command_args, stdout=subprocess.PIPE)
+                return result.stdout
 
         if storage is None:
             return _call_cli(cmd % cmd_kwargs)
