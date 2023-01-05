@@ -176,6 +176,11 @@ class Video(models.Model):
                 self._is_local = False
             return self._is_local
 
+    @staticmethod
+    def convert_path(path, ext):
+        path = path.replace(FFMPEG_ORIG_VIDEO, FFMPEG_CONV_VIDEO)
+        return re.sub(r"[^\.]{1,10}$", ext, path)
+
     @property
     def filepath(self):
         if self.is_local:
@@ -188,15 +193,11 @@ class Video(models.Model):
     def converted_path(self):
         if not self.convert_extension:
             return None
-        filepath = self.filepath
-        filepath = filepath.replace(FFMPEG_ORIG_VIDEO, FFMPEG_CONV_VIDEO)
-        return re.sub(r"[^\.]{1,10}$", self.convert_extension, filepath)
+        return Video.convert_path(self.filepath, self.convert_extension)
 
     @property
     def thumb_video_path(self):
-        filepath = self.filepath
-        filepath = filepath.replace(FFMPEG_ORIG_VIDEO, FFMPEG_THUMB_VIDEO)
-        return re.sub(r"[^\.]{1,10}$", "jpg", filepath)
+        return Video.convert_path(self.filepath, "jpg")
 
     def __str__(self):
         return self.title or "Without title #%s" % self.pk
